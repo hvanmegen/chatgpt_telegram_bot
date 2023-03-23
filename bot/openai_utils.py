@@ -4,22 +4,21 @@ import tiktoken
 import openai
 openai.api_key = config.openai_api_key
 
-
 CHAT_MODES = config.chat_modes
 
 OPENAI_COMPLETION_OPTIONS = {
     "temperature": 0.7,
     "max_tokens": 1000,
     "top_p": 1,
-    "frequency_penalty": 0,
-    "presence_penalty": 0
+    "frequency_penalty": 0.1,
+    "presence_penalty": 0.1
 }
 
 
 class ChatGPT:
     def __init__(self, use_chatgpt_api=True):
         self.use_chatgpt_api = use_chatgpt_api
-    
+
     async def send_message(self, message, dialog_messages=[], chat_mode="assistant"):
         if chat_mode not in CHAT_MODES.keys():
             raise ValueError(f"Chat mode {chat_mode} is not supported")
@@ -47,7 +46,7 @@ class ChatGPT:
 
                 answer = self._postprocess_answer(answer)
                 n_used_tokens = r.usage.total_tokens
-                
+
             except openai.error.InvalidRequestError as e:  # too many tokens
                 if len(dialog_messages) == 0:
                     raise ValueError("Dialog messages is reduced to zero, but still has too many tokens to make completion") from e
@@ -92,7 +91,7 @@ class ChatGPT:
                         stream=True,
                         **OPENAI_COMPLETION_OPTIONS
                     )
-                    
+
                     answer = ""
                     async for r_item in r_gen:
                         answer += r_item.choices[0].text
@@ -101,7 +100,7 @@ class ChatGPT:
                     n_used_tokens = self._count_tokens_for_gpt(prompt, answer, model="text-davinci-003")
 
                 answer = self._postprocess_answer(answer)
-                
+
             except openai.error.InvalidRequestError as e:  # too many tokens
                 if len(dialog_messages) == 0:
                     raise ValueError("Dialog messages is reduced to zero, but still has too many tokens to make completion") from e
@@ -132,7 +131,7 @@ class ChatGPT:
 
     def _generate_prompt_messages_for_chatgpt_api(self, message, dialog_messages, chat_mode):
         prompt = CHAT_MODES[chat_mode]["prompt_start"]
-        
+
         messages = [{"role": "system", "content": prompt}]
         for dialog_message in dialog_messages:
             messages.append({"role": "user", "content": dialog_message["user"]})
@@ -146,28 +145,27 @@ class ChatGPT:
         return answer
 
     def _count_tokens_for_chatgpt(self, prompt_messages, answer, model="gpt-3.5-turbo"):
-        prompt_messages += [{"role": "assistant", "content": answer}]        
+        prompt_messages += [{"role": "assistant", "content": answer}]
 
         encoding = tiktoken.encoding_for_model(model)
         n_tokens = 0
         for message in prompt_messages:
             n_tokens += 4  # every message follows "<im_start>{role/name}\n{content}<im_end>\n"
-            for key, value in message.items():            
+            for key, value in message.items():
                 if key == "role":
                     n_tokens += 1
                 elif key == "content":
                     n_tokens += len(encoding.encode(value))
                 else:
                     raise ValueError(f"Unknown key in message: {key}")
-                    
-        n_tokens -= 1  # remove 1 "<im_end>" token          
+
+        n_tokens -= 1  # remove 1 "<im_end>" token
         return n_tokens
 
     def _count_tokens_for_gpt(self, prompt, answer, model="text-davinci-003"):
         encoding = tiktoken.encoding_for_model(model)
         n_tokens = len(encoding.encode(prompt)) + len(encoding.encode(answer)) + 1
         return n_tokens
-
 
 async def transcribe_audio(audio_file):
     r = await openai.Audio.atranscribe("whisper-1", audio_file)
