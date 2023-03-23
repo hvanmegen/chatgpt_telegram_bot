@@ -23,7 +23,7 @@ class Database:
                 raise ValueError(f"User {user_id} does not exist")
             else:
                 return False
-        
+
     def add_new_user(
         self,
         user_id: int,
@@ -42,9 +42,9 @@ class Database:
 
             "last_interaction": datetime.now(),
             "first_seen": datetime.now(),
-            
+
             "current_dialog_id": None,
-            "current_chat_mode": "assistant",
+            "current_chat_mode": config.default_mode, # specify the default mode
             "current_model": config.models["available_text_models"][0],
 
             "n_used_tokens": {},
@@ -112,7 +112,7 @@ class Database:
         if dialog_id is None:
             dialog_id = self.get_user_attribute(user_id, "current_dialog_id")
 
-        dialog_dict = self.dialog_collection.find_one({"_id": dialog_id, "user_id": user_id})               
+        dialog_dict = self.dialog_collection.find_one({"_id": dialog_id, "user_id": user_id})
         return dialog_dict["messages"]
 
     def set_dialog_messages(self, user_id: int, dialog_messages: list, dialog_id: Optional[str] = None):
@@ -120,7 +120,7 @@ class Database:
 
         if dialog_id is None:
             dialog_id = self.get_user_attribute(user_id, "current_dialog_id")
-        
+
         self.dialog_collection.update_one(
             {"_id": dialog_id, "user_id": user_id},
             {"$set": {"messages": dialog_messages}}
