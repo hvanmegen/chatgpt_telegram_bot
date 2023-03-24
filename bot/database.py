@@ -44,7 +44,7 @@ class Database:
             "first_seen": datetime.now(),
 
             "current_dialog_id": None,
-            "current_chat_mode": config.default_mode,
+            "current_chat_mode": config.default_chat_mode,
             "current_model": config.models["available_text_models"][0],
 
             "n_used_tokens": {},

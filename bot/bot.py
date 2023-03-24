@@ -33,7 +33,6 @@ import config
 import database
 import openai_utils
 
-
 # setup
 db = database.Database()
 logger = logging.getLogger(__name__)
@@ -61,7 +60,8 @@ async def register_user_if_not_exists(update: Update, context: CallbackContext, 
             update.message.chat_id,
             username=user.username,
             first_name=user.first_name,
-            last_name= user.last_name
+            last_name=user.last_name,
+            current_chat_mode=config.default_chat_mode
         )
         db.start_new_dialog(user.id)
 
@@ -160,7 +160,8 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
             dialog_messages = db.get_dialog_messages(user_id, dialog_id=None)
             parse_mode = {
                 "html": ParseMode.HTML,
-                "markdown": ParseMode.MARKDOWN
+                "markdown": ParseMode.MARKDOWN,
+                "markdownv2": ParseMode.MARKDOWN_V2
             }[openai_utils.CHAT_MODES[chat_mode]["parse_mode"]]
 
             chatgpt_instance = openai_utils.ChatGPT(model=current_model)
