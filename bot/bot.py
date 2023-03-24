@@ -60,8 +60,7 @@ async def register_user_if_not_exists(update: Update, context: CallbackContext, 
             update.message.chat_id,
             username=user.username,
             first_name=user.first_name,
-            last_name=user.last_name,
-            current_chat_mode=config.default_chat_mode
+            last_name=user.last_name
         )
         db.start_new_dialog(user.id)
 
