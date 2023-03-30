@@ -1,4 +1,4 @@
-FROM python:3.8-alpine
+FROM python:3.8-slim
 
 ENV PYTHONFAULTHANDLER=1
 ENV PYTHONUNBUFFERED=1
@@ -8,21 +8,23 @@ ENV PIP_NO_CACHE_DIR=off
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_DEFAULT_TIMEOUT=100
 
-# best method: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
-RUN apk --no-cache add ffmpeg
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python-dev \
+    build-essential \
+    python3-venv \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
-# Uncomment these commands for easy restarts during development instead of
-# having to do a full rebuild every time you make a change.
 RUN mkdir -p /code/bot /code/config
-VOLUME ./bot:/code/bot
-VOLUME ./config:/code/config
-
+ADD . /code
 WORKDIR /code
-
-COPY requirements.txt /code/
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-ADD . /code
+VOLUME ./bot:/code/bot
+VOLUME ./config:/code/config
 
 CMD ["bash"]
