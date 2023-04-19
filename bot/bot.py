@@ -96,9 +96,8 @@ async def start_handle(update: Update, context: CallbackContext):
     db.set_user_attribute(user_id, "last_interaction", datetime.now())
     db.start_new_dialog(user_id)
 
-    reply_text = "Hi! I'm <b>DrHenry</b>, a bot that implements the OpenAI GPT-3.5 API 🤖\n\n"
+    reply_text = "Hi! I'm a bot that implements the OpenAI GPT-3.5-turbo and GPT-4 API 🤖\n\n"
     reply_text += HELP_MESSAGE
-
     reply_text += "\nAsk me anything!"
 
     await update.message.reply_text(reply_text, parse_mode=ParseMode.HTML)
@@ -381,12 +380,12 @@ async def set_settings_handle(update: Update, context: CallbackContext):
     db.start_new_dialog(user_id)
 
     text, reply_markup = get_settings_menu(user_id)
-    try:                    
+    try:
         await query.edit_message_text(text, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
     except telegram.error.BadRequest as e:
         if str(e).startswith("Message is not modified"):
             pass
-    
+
 
 async def show_balance_handle(update: Update, context: CallbackContext):
     await register_user_if_not_exists(update, context, update.message.from_user)
@@ -415,8 +414,8 @@ async def show_balance_handle(update: Update, context: CallbackContext):
     voice_recognition_n_spent_dollars = config.models["info"]["whisper"]["price_per_1_min"] * (n_transcribed_seconds / 60)
     if n_transcribed_seconds != 0:
         details_text += f"- Whisper (voice recognition): <b>{voice_recognition_n_spent_dollars:.03f}$</b> / <b>{n_transcribed_seconds:.01f} seconds</b>\n"
-    
-    total_n_spent_dollars += voice_recognition_n_spent_dollars    
+
+    total_n_spent_dollars += voice_recognition_n_spent_dollars
 
     text = f"You spent <b>{total_n_spent_dollars:.03f}$</b>\n"
     text += f"You used <b>{total_n_used_tokens}</b> tokens\n\n"
