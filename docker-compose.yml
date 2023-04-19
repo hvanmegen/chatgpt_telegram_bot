@@ -5,7 +5,7 @@ services:
     container_name: mongo-2
     image: mongo:latest
     ports:
-      - 127.0.0.1:${MONGODB_PORT:-27017}:${MONGODB_PORT:-27017}
+      - 127.0.0.1:${MONGODB_PORT:-27018}:${MONGODB_PORT:-27018}
     volumes:
       - ${MONGODB_PATH:-./mongodb}:/data/db
     restart: unless-stopped
@@ -27,10 +27,10 @@ services:
     container_name: mongo-express-2
     image: mongo-express:latest
     ports:
-      - ${MONGO_EXPRESS_PORT:-8081}:${MONGO_EXPRESS_PORT:-8081}
+      - ${MONGO_EXPRESS_PORT:-8082}:${MONGO_EXPRESS_PORT:-8082}
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo-2
-      - ME_CONFIG_MONGODB_PORT=${MONGODB_PORT:-27017}
+      - ME_CONFIG_MONGODB_PORT=${MONGODB_PORT:-27018}
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
       - ME_CONFIG_MONGODB_AUTH_DATABASE=chatgpt_telegram_bot
       - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USERNAME:-username}
